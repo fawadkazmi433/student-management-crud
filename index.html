@@ -35,14 +35,16 @@
                 <i class="fa-solid fa-graduation-cap"></i>
             </div>
 
-            <span>Student<span class="logo-blue">MS</span></span>
+            <span>
+                Student<span class="logo-blue">MS</span>
+            </span>
         </div>
 
         <div class="menu-title">MAIN</div>
 
         <nav>
 
-            <button class="nav-item active">
+            <button class="nav-item active" onclick="goToDashboard()">
                 <i class="fa-solid fa-chart-pie"></i>
                 <span>Dashboard</span>
             </button>
@@ -64,7 +66,9 @@
 
         </nav>
 
-        <div class="menu-title settings-title">SETTINGS</div>
+        <div class="menu-title settings-title">
+            SETTINGS
+        </div>
 
         <button class="nav-item" onclick="showSettings()">
             <i class="fa-solid fa-gear"></i>
@@ -97,7 +101,10 @@
 
         <header class="topbar">
 
-            <button class="mobile-menu" onclick="toggleSidebar()">
+            <button
+                class="mobile-menu"
+                onclick="toggleSidebar()"
+            >
                 <i class="fa-solid fa-bars"></i>
             </button>
 
@@ -108,8 +115,15 @@
                     <span id="currentDate"></span>
                 </div>
 
-                <button class="icon-button" onclick="toggleTheme()" title="Toggle theme">
-                    <i class="fa-solid fa-sun" id="themeIcon"></i>
+                <button
+                    class="icon-button"
+                    onclick="toggleTheme()"
+                    title="Toggle theme"
+                >
+                    <i
+                        class="fa-solid fa-moon"
+                        id="themeIcon"
+                    ></i>
                 </button>
 
             </div>
@@ -117,23 +131,28 @@
         </header>
 
 
-        <!-- CONTENT -->
+        <!-- ================= CONTENT ================= -->
 
-        <section class="content">
+        <section class="content" id="dashboard">
 
-            <!-- GREETING -->
+            <!-- WELCOME -->
 
             <div class="welcome">
 
                 <div>
-                    <h1>Welcome back, Admin <span>👋</span></h1>
+                    <h1>
+                        Welcome back, Admin <span>👋</span>
+                    </h1>
 
                     <p>
                         Here's what's happening with your students today.
                     </p>
                 </div>
 
-                <button class="primary-button" onclick="openAddModal()">
+                <button
+                    class="primary-button"
+                    onclick="openAddModal()"
+                >
                     <i class="fa-solid fa-plus"></i>
                     Add Student
                 </button>
@@ -207,9 +226,12 @@
             </div>
 
 
-            <!-- ================= STUDENT TABLE ================= -->
+            <!-- ================= STUDENTS ================= -->
 
-            <section class="students-card" id="studentsSection">
+            <section
+                class="students-card"
+                id="studentsSection"
+            >
 
                 <div class="card-header">
 
@@ -221,7 +243,10 @@
                         </p>
                     </div>
 
-                    <button class="primary-button" onclick="openAddModal()">
+                    <button
+                        class="primary-button"
+                        onclick="openAddModal()"
+                    >
                         <i class="fa-solid fa-plus"></i>
                         Add Student
                     </button>
@@ -241,15 +266,16 @@
                             type="text"
                             id="searchInput"
                             placeholder="Search by name, ID, CNIC..."
-                            oninput="renderStudents()"
                         >
 
                     </div>
 
 
-                    <select id="courseFilter" onchange="renderStudents()">
+                    <select id="courseFilter">
 
-                        <option value="">All Courses</option>
+                        <option value="">
+                            All Courses
+                        </option>
 
                         <option value="Computer Science">
                             Computer Science
@@ -274,16 +300,27 @@
                     </select>
 
 
-                    <select id="genderFilter" onchange="renderStudents()">
+                    <select id="genderFilter">
 
-                        <option value="">All Gender</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
+                        <option value="">
+                            All Gender
+                        </option>
+
+                        <option value="Male">
+                            Male
+                        </option>
+
+                        <option value="Female">
+                            Female
+                        </option>
 
                     </select>
 
 
-                    <button class="clear-button" onclick="clearFilters()">
+                    <button
+                        class="clear-button"
+                        onclick="clearFilters()"
+                    >
                         <i class="fa-solid fa-rotate"></i>
                         Clear
                     </button>
@@ -300,7 +337,6 @@
                         <thead>
 
                             <tr>
-
                                 <th>ID</th>
                                 <th>Student</th>
                                 <th>Father Name</th>
@@ -308,7 +344,6 @@
                                 <th>Gender</th>
                                 <th>Phone</th>
                                 <th>Actions</th>
-
                             </tr>
 
                         </thead>
@@ -322,7 +357,10 @@
 
                 <!-- EMPTY STATE -->
 
-                <div class="empty-state" id="emptyState">
+                <div
+                    class="empty-state"
+                    id="emptyState"
+                >
 
                     <div class="empty-icon">
                         <i class="fa-solid fa-user-graduate"></i>
@@ -345,8 +383,6 @@
                 </div>
 
 
-                <!-- TABLE FOOTER -->
-
                 <div class="table-footer">
 
                     <span id="resultCount">
@@ -368,18 +404,29 @@
 <!-- ADD / EDIT MODAL -->
 <!-- ================================================= -->
 
-<div class="modal-overlay" id="studentModal">
+<div
+    class="modal-overlay"
+    id="studentModal"
+>
 
     <div class="modal">
 
         <div class="modal-header">
 
             <div>
-                <h2 id="modalTitle">Add Student</h2>
-                <p>Enter student information below</p>
+                <h2 id="modalTitle">
+                    Add Student
+                </h2>
+
+                <p>
+                    Enter student information below
+                </p>
             </div>
 
-            <button class="close-button" onclick="closeModal()">
+            <button
+                class="close-button"
+                onclick="closeModal()"
+            >
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
@@ -388,8 +435,10 @@
 
         <form id="studentForm">
 
-            <input type="hidden" id="editStudentId">
-
+            <input
+                type="hidden"
+                id="editStudentId"
+            >
 
             <div class="form-grid">
 
@@ -407,8 +456,6 @@
                         placeholder="Enter student name"
                         required
                     >
-
-                    <small class="error" id="nameError"></small>
 
                 </div>
 
@@ -428,8 +475,6 @@
                         required
                     >
 
-                    <small class="error" id="fatherError"></small>
-
                 </div>
 
 
@@ -444,7 +489,7 @@
                     <input
                         type="text"
                         id="cnic"
-                        placeholder="XXXXX-XXXXXXX-X"
+                        placeholder="35202-1234567-1"
                         maxlength="15"
                         required
                     >
@@ -452,8 +497,6 @@
                     <small class="hint">
                         Format: 35202-1234567-1
                     </small>
-
-                    <small class="error" id="cnicError"></small>
 
                 </div>
 
@@ -469,12 +512,10 @@
                     <input
                         type="text"
                         id="phone"
-                        placeholder="03XX-XXXXXXX"
+                        placeholder="0300-1234567"
                         maxlength="12"
                         required
                     >
-
-                    <small class="error" id="phoneError"></small>
 
                 </div>
 
@@ -483,15 +524,15 @@
 
                 <div class="form-group">
 
-                    <label>Email</label>
+                    <label>
+                        Email
+                    </label>
 
                     <input
                         type="email"
                         id="email"
                         placeholder="student@example.com"
                     >
-
-                    <small class="error" id="emailError"></small>
 
                 </div>
 
@@ -504,7 +545,10 @@
                         Gender <span>*</span>
                     </label>
 
-                    <select id="gender" required>
+                    <select
+                        id="gender"
+                        required
+                    >
 
                         <option value="">
                             Select Gender
@@ -527,7 +571,9 @@
 
                 <div class="form-group">
 
-                    <label>Date of Birth</label>
+                    <label>
+                        Date of Birth
+                    </label>
 
                     <input
                         type="date"
@@ -545,29 +591,32 @@
                         Course <span>*</span>
                     </label>
 
-                    <select id="course" required>
+                    <select
+                        id="course"
+                        required
+                    >
 
                         <option value="">
                             Select Course
                         </option>
 
-                        <option>
+                        <option value="Computer Science">
                             Computer Science
                         </option>
 
-                        <option>
+                        <option value="Software Engineering">
                             Software Engineering
                         </option>
 
-                        <option>
+                        <option value="Information Technology">
                             Information Technology
                         </option>
 
-                        <option>
+                        <option value="Artificial Intelligence">
                             Artificial Intelligence
                         </option>
 
-                        <option>
+                        <option value="Data Science">
                             Data Science
                         </option>
 
@@ -580,7 +629,9 @@
 
                 <div class="form-group">
 
-                    <label>Semester</label>
+                    <label>
+                        Semester
+                    </label>
 
                     <select id="semester">
 
@@ -588,14 +639,14 @@
                             Select Semester
                         </option>
 
-                        <option>1st</option>
-                        <option>2nd</option>
-                        <option>3rd</option>
-                        <option>4th</option>
-                        <option>5th</option>
-                        <option>6th</option>
-                        <option>7th</option>
-                        <option>8th</option>
+                        <option value="1st">1st</option>
+                        <option value="2nd">2nd</option>
+                        <option value="3rd">3rd</option>
+                        <option value="4th">4th</option>
+                        <option value="5th">5th</option>
+                        <option value="6th">6th</option>
+                        <option value="7th">7th</option>
+                        <option value="8th">8th</option>
 
                     </select>
 
@@ -606,7 +657,9 @@
 
                 <div class="form-group full">
 
-                    <label>Address</label>
+                    <label>
+                        Address
+                    </label>
 
                     <textarea
                         id="address"
@@ -625,7 +678,9 @@
 
                 <div>
 
-                    <small>Student ID</small>
+                    <small>
+                        Student ID
+                    </small>
 
                     <strong id="generatedId">
                         STU-00001
@@ -654,10 +709,13 @@
                     type="submit"
                     class="primary-button"
                 >
+
                     <i class="fa-solid fa-floppy-disk"></i>
+
                     <span id="saveButtonText">
                         Save Student
                     </span>
+
                 </button>
 
             </div>
@@ -670,18 +728,28 @@
 
 
 <!-- ================================================= -->
-<!-- VIEW DETAILS MODAL -->
+<!-- VIEW MODAL -->
 <!-- ================================================= -->
 
-<div class="modal-overlay" id="viewModal">
+<div
+    class="modal-overlay"
+    id="viewModal"
+>
 
     <div class="modal view-modal">
 
         <div class="modal-header">
 
             <div>
-                <h2>Student Details</h2>
-                <p>Complete student information</p>
+
+                <h2>
+                    Student Details
+                </h2>
+
+                <p>
+                    Complete student information
+                </p>
+
             </div>
 
             <button
@@ -692,7 +760,6 @@
             </button>
 
         </div>
-
 
         <div id="studentDetails"></div>
 
@@ -705,17 +772,25 @@
 <!-- TOAST -->
 <!-- ================================================= -->
 
-<div class="toast" id="toast">
+<div
+    class="toast"
+    id="toast"
+>
 
     <div class="toast-icon">
         <i class="fa-solid fa-check"></i>
     </div>
 
     <div>
-        <strong id="toastTitle">Success!</strong>
+
+        <strong id="toastTitle">
+            Success!
+        </strong>
+
         <p id="toastMessage">
             Student added successfully.
         </p>
+
     </div>
 
     <button onclick="hideToast()">

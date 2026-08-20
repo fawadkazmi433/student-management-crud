@@ -1,0 +1,8 @@
+Items
+SQL Server Services
+SQL Server Network Configuration (32bit)
+SQL Native Client 11.0 Configuration (32bit)
+Azure Extension For SQL Server
+SQL Server Network Configuration
+SQL Native Client 11.0 Configuration
+Azure Extension For SQL Server

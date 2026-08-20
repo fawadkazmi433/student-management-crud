@@ -1,138 +1,145 @@
-// =====================================================
-// STUDENT MANAGEMENT SYSTEM
-// =====================================================
+/* =====================================================
+   STUDENT MANAGEMENT SYSTEM
+   CRUD + LOCAL STORAGE
+===================================================== */
 
 
-// ================= INITIAL DATA =================
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
 
-const sampleStudents = [
-    {
-        id: "STU-00001",
-        name: "Ahmad Raza",
-        father: "Muhammad Raza",
-        cnic: "35202-1234567-1",
-        phone: "0300-1234567",
-        email: "ahmad@example.com",
-        gender: "Male",
-        dob: "2002-05-12",
-        course: "Computer Science",
-        semester: "6th",
-        address: "Lahore, Pakistan"
-    },
+let students = JSON.parse(
+    localStorage.getItem("students")
+) || [];
 
-    {
-        id: "STU-00002",
-        name: "Zainab Fatima",
-        father: "Ali Hassan",
-        cnic: "35202-7654321-2",
-        phone: "0301-2345678",
-        email: "zainab@example.com",
-        gender: "Female",
-        dob: "2003-02-18",
-        course: "Software Engineering",
-        semester: "5th",
-        address: "Islamabad, Pakistan"
-    },
-
-    {
-        id: "STU-00003",
-        name: "Usman Khan",
-        father: "Khalid Khan",
-        cnic: "35202-1112223-3",
-        phone: "0302-3456789",
-        email: "usman@example.com",
-        gender: "Male",
-        dob: "2001-09-25",
-        course: "Information Technology",
-        semester: "7th",
-        address: "Peshawar, Pakistan"
-    },
-
-    {
-        id: "STU-00004",
-        name: "Ayesha Noor",
-        father: "Shakeel Ahmed",
-        cnic: "35202-4445556-4",
-        phone: "0303-4567890",
-        email: "ayesha@example.com",
-        gender: "Female",
-        dob: "2003-11-10",
-        course: "Data Science",
-        semester: "4th",
-        address: "Karachi, Pakistan"
-    },
-
-    {
-        id: "STU-00005",
-        name: "Hassan Ali",
-        father: "Imran Ali",
-        cnic: "35202-7778889-5",
-        phone: "0304-5678901",
-        email: "hassan@example.com",
-        gender: "Male",
-        dob: "2002-07-15",
-        course: "Artificial Intelligence",
-        semester: "6th",
-        address: "Lahore, Pakistan"
-    },
-
-    {
-        id: "STU-00006",
-        name: "Sana Khan",
-        father: "Akram Khan",
-        cnic: "35202-9991112-6",
-        phone: "0305-6789012",
-        email: "sana@example.com",
-        gender: "Female",
-        dob: "2003-04-22",
-        course: "Computer Science",
-        semester: "3rd",
-        address: "Rawalpindi, Pakistan"
-    }
-];
+let toastTimer;
 
 
-// ================= STORAGE =================
+/* =====================================================
+   DOM READY
+===================================================== */
 
-let students =
-    JSON.parse(localStorage.getItem("students")) || [];
+document.addEventListener("DOMContentLoaded", function () {
+
+    setCurrentDate();
+
+    renderStudents();
+
+    updateStatistics();
+
+    setupEventListeners();
+
+    updateGeneratedId();
+
+    loadTheme();
+
+});
 
 
-// Add sample data only first time
-if (students.length === 0) {
+/* =====================================================
+   EVENT LISTENERS
+===================================================== */
 
-    students = sampleStudents;
+function setupEventListeners() {
 
-    saveStudents();
+    const form = document.getElementById("studentForm");
+
+    const searchInput =
+        document.getElementById("searchInput");
+
+    const courseFilter =
+        document.getElementById("courseFilter");
+
+    const genderFilter =
+        document.getElementById("genderFilter");
+
+
+    /* FORM SUBMIT */
+
+    form.addEventListener("submit", function (event) {
+
+        event.preventDefault();
+
+        saveStudent();
+
+    });
+
+
+    /* SEARCH */
+
+    searchInput.addEventListener("input", function () {
+
+        renderStudents();
+
+    });
+
+
+    /* COURSE FILTER */
+
+    courseFilter.addEventListener("change", function () {
+
+        renderStudents();
+
+    });
+
+
+    /* GENDER FILTER */
+
+    genderFilter.addEventListener("change", function () {
+
+        renderStudents();
+
+    });
+
+
+    /* ESCAPE KEY */
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            closeModal();
+
+            closeViewModal();
+
+        }
+
+    });
+
+
+    /* CLOSE MODAL WHEN CLICKING OUTSIDE */
+
+    document
+        .getElementById("studentModal")
+        .addEventListener("click", function (event) {
+
+            if (event.target === this) {
+
+                closeModal();
+
+            }
+
+        });
+
+
+    document
+        .getElementById("viewModal")
+        .addEventListener("click", function (event) {
+
+            if (event.target === this) {
+
+                closeViewModal();
+
+            }
+
+        });
 
 }
 
 
-// ================= DOM ELEMENTS =================
-
-const studentForm =
-    document.getElementById("studentForm");
-
-const modal =
-    document.getElementById("studentModal");
-
-const viewModal =
-    document.getElementById("viewModal");
-
-
-// ================= SAVE =================
-
-function saveStudents() {
-
-    localStorage.setItem(
-        "students",
-        JSON.stringify(students)
-    );
-
-}
-
-
-// ================= DATE =================
+/* =====================================================
+   DATE
+===================================================== */
 
 function setCurrentDate() {
 
@@ -142,380 +149,422 @@ function setCurrentDate() {
     const today = new Date();
 
     dateElement.textContent =
-        today.toLocaleDateString(
-            "en-US",
-            {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric"
-            }
-        );
+        today.toLocaleDateString("en-US", {
+            weekday: "short",
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        });
 
 }
 
 
-// ================= UNIQUE ID =================
+/* =====================================================
+   STUDENT ID
+===================================================== */
 
-function generateStudentID() {
+function generateStudentId() {
 
     let maxNumber = 0;
 
-    students.forEach(student => {
+    students.forEach(function (student) {
 
-        const number =
-            parseInt(
-                student.id.replace("STU-", "")
-            );
+        const number = parseInt(
+            student.id.replace("STU-", ""),
+            10
+        );
 
-        if (number > maxNumber) {
+        if (!isNaN(number) && number > maxNumber) {
+
             maxNumber = number;
+
         }
 
     });
 
-    return `STU-${String(maxNumber + 1).padStart(5, "0")}`;
+
+    const nextNumber = maxNumber + 1;
+
+
+    return "STU-" +
+        String(nextNumber).padStart(5, "0");
 
 }
 
 
-// ================= OPEN ADD MODAL =================
+function updateGeneratedId() {
 
-function openAddModal() {
-
-    resetForm();
-
-    document.getElementById("modalTitle").textContent =
-        "Add Student";
-
-    document.getElementById("saveButtonText").textContent =
-        "Save Student";
-
-    document.getElementById("generatedId").textContent =
-        generateStudentID();
-
-    modal.classList.add("show");
-
-}
-
-
-// ================= CLOSE MODAL =================
-
-function closeModal() {
-
-    modal.classList.remove("show");
-
-}
-
-
-// ================= RESET FORM =================
-
-function resetForm() {
-
-    studentForm.reset();
-
-    document.getElementById("editStudentId").value = "";
-
-    clearErrors();
-
-    document.getElementById("generatedId").textContent =
-        generateStudentID();
-
-}
-
-
-// ================= CLEAR ERRORS =================
-
-function clearErrors() {
-
-    document.getElementById("nameError").textContent = "";
-
-    document.getElementById("fatherError").textContent = "";
-
-    document.getElementById("cnicError").textContent = "";
-
-    document.getElementById("phoneError").textContent = "";
-
-    document.getElementById("emailError").textContent = "";
-
-}
-
-
-// ================= CNIC FORMAT =================
-
-document
-    .getElementById("cnic")
-    .addEventListener("input", function () {
-
-        let value =
-            this.value.replace(/\D/g, "");
-
-        if (value.length > 13) {
-            value = value.substring(0, 13);
-        }
-
-        if (value.length > 5) {
-
-            value =
-                value.substring(0, 5)
-                + "-"
-                + value.substring(5);
-
-        }
-
-        if (value.length > 13) {
-
-            value =
-                value.substring(0, 13)
-                + "-"
-                + value.substring(13);
-
-        }
-
-        this.value = value;
-
-    });
-
-
-// ================= PHONE FORMAT =================
-
-document
-    .getElementById("phone")
-    .addEventListener("input", function () {
-
-        let value =
-            this.value.replace(/\D/g, "");
-
-        if (value.length > 11) {
-            value = value.substring(0, 11);
-        }
-
-        if (value.length > 4) {
-
-            value =
-                value.substring(0, 4)
-                + "-"
-                + value.substring(4);
-
-        }
-
-        this.value = value;
-
-    });
-
-
-// ================= VALIDATION =================
-
-function validateForm() {
-
-    clearErrors();
-
-    let valid = true;
-
-    const name =
-        document.getElementById("studentName").value.trim();
-
-    const father =
-        document.getElementById("fatherName").value.trim();
-
-    const cnic =
-        document.getElementById("cnic").value.trim();
-
-    const phone =
-        document.getElementById("phone").value.trim();
-
-    const email =
-        document.getElementById("email").value.trim();
+    const idElement =
+        document.getElementById("generatedId");
 
     const editId =
         document.getElementById("editStudentId").value;
 
 
-    // NAME
+    if (editId) {
 
-    if (name.length < 3) {
+        idElement.textContent = editId;
 
-        document.getElementById("nameError").textContent =
-            "Please enter a valid student name.";
+    } else {
 
-        valid = false;
-
-    }
-
-
-    // FATHER NAME
-
-    if (father.length < 3) {
-
-        document.getElementById("fatherError").textContent =
-            "Please enter a valid father name.";
-
-        valid = false;
+        idElement.textContent =
+            generateStudentId();
 
     }
-
-
-    // CNIC
-
-    const cnicRegex =
-        /^\d{5}-\d{7}-\d{1}$/;
-
-    if (!cnicRegex.test(cnic)) {
-
-        document.getElementById("cnicError").textContent =
-            "CNIC must be like 35202-1234567-1.";
-
-        valid = false;
-
-    }
-
-
-    // DUPLICATE CNIC
-
-    const duplicateCNIC =
-        students.some(student =>
-            student.cnic === cnic &&
-            student.id !== editId
-        );
-
-    if (duplicateCNIC) {
-
-        document.getElementById("cnicError").textContent =
-            "This CNIC is already registered.";
-
-        valid = false;
-
-    }
-
-
-    // PHONE
-
-    const phoneRegex =
-        /^03\d{2}-\d{7}$/;
-
-    if (!phoneRegex.test(phone)) {
-
-        document.getElementById("phoneError").textContent =
-            "Phone must be like 0300-1234567.";
-
-        valid = false;
-
-    }
-
-
-    // EMAIL
-
-    if (email !== "") {
-
-        const emailRegex =
-            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-        if (!emailRegex.test(email)) {
-
-            document.getElementById("emailError").textContent =
-                "Please enter a valid email.";
-
-            valid = false;
-
-        }
-
-    }
-
-    return valid;
 
 }
 
 
-// ================= CREATE / UPDATE =================
+/* =====================================================
+   OPEN ADD MODAL
+===================================================== */
 
-studentForm.addEventListener(
-    "submit",
-    function (event) {
+function openAddModal() {
 
-        event.preventDefault();
+    const modal =
+        document.getElementById("studentModal");
 
-        if (!validateForm()) {
+    const title =
+        document.getElementById("modalTitle");
+
+    const buttonText =
+        document.getElementById("saveButtonText");
+
+
+    resetForm();
+
+    title.textContent = "Add Student";
+
+    buttonText.textContent = "Save Student";
+
+
+    document.getElementById(
+        "editStudentId"
+    ).value = "";
+
+
+    updateGeneratedId();
+
+
+    modal.classList.add("show");
+
+
+    setTimeout(function () {
+
+        document
+            .getElementById("studentName")
+            .focus();
+
+    }, 100);
+
+}
+
+
+/* =====================================================
+   CLOSE MODAL
+===================================================== */
+
+function closeModal() {
+
+    document
+        .getElementById("studentModal")
+        .classList.remove("show");
+
+}
+
+
+/* =====================================================
+   RESET FORM
+===================================================== */
+
+function resetForm() {
+
+    document
+        .getElementById("studentForm")
+        .reset();
+
+
+    document
+        .getElementById("editStudentId")
+        .value = "";
+
+
+    document
+        .getElementById("modalTitle")
+        .textContent = "Add Student";
+
+
+    document
+        .getElementById("saveButtonText")
+        .textContent = "Save Student";
+
+
+    updateGeneratedId();
+
+}
+
+
+/* =====================================================
+   GET FORM DATA
+===================================================== */
+
+function getFormData() {
+
+    return {
+
+        name:
+            document
+                .getElementById("studentName")
+                .value
+                .trim(),
+
+        fatherName:
+            document
+                .getElementById("fatherName")
+                .value
+                .trim(),
+
+        cnic:
+            document
+                .getElementById("cnic")
+                .value
+                .trim(),
+
+        phone:
+            document
+                .getElementById("phone")
+                .value
+                .trim(),
+
+        email:
+            document
+                .getElementById("email")
+                .value
+                .trim(),
+
+        gender:
+            document
+                .getElementById("gender")
+                .value,
+
+        dob:
+            document
+                .getElementById("dob")
+                .value,
+
+        course:
+            document
+                .getElementById("course")
+                .value,
+
+        semester:
+            document
+                .getElementById("semester")
+                .value,
+
+        address:
+            document
+                .getElementById("address")
+                .value
+                .trim()
+
+    };
+
+}
+
+
+/* =====================================================
+   VALIDATION
+===================================================== */
+
+function validateStudent(data, editId = "") {
+
+    if (!data.name) {
+
+        showToast(
+            "Error",
+            "Please enter student name.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    if (!data.fatherName) {
+
+        showToast(
+            "Error",
+            "Please enter father name.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    /* CNIC */
+
+    const cnicPattern =
+        /^\d{5}-\d{7}-\d{1}$/;
+
+    if (!cnicPattern.test(data.cnic)) {
+
+        showToast(
+            "Error",
+            "CNIC must be like 35202-1234567-1.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    /* PHONE */
+
+    const phonePattern =
+        /^03\d{2}-\d{7}$/;
+
+    if (!phonePattern.test(data.phone)) {
+
+        showToast(
+            "Error",
+            "Phone must be like 0300-1234567.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    /* GENDER */
+
+    if (!data.gender) {
+
+        showToast(
+            "Error",
+            "Please select gender.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    /* COURSE */
+
+    if (!data.course) {
+
+        showToast(
+            "Error",
+            "Please select course.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    /* DUPLICATE CNIC */
+
+    const duplicate =
+        students.find(function (student) {
+
+            return (
+                student.cnic === data.cnic &&
+                student.id !== editId
+            );
+
+        });
+
+
+    if (duplicate) {
+
+        showToast(
+            "Error",
+            "A student with this CNIC already exists.",
+            "error"
+        );
+
+        return false;
+
+    }
+
+
+    return true;
+
+}
+
+
+/* =====================================================
+   SAVE STUDENT
+===================================================== */
+
+function saveStudent() {
+
+    const data = getFormData();
+
+    const editId =
+        document
+            .getElementById("editStudentId")
+            .value;
+
+
+    /* VALIDATE */
+
+    if (!validateStudent(data, editId)) {
+
+        return;
+
+    }
+
+
+    /* ============================
+       EDIT EXISTING STUDENT
+    ============================ */
+
+    if (editId) {
+
+        const index =
+            students.findIndex(function (student) {
+
+                return student.id === editId;
+
+            });
+
+
+        if (index === -1) {
+
+            showToast(
+                "Error",
+                "Student not found.",
+                "error"
+            );
+
             return;
+
         }
 
 
-        const editId =
-            document.getElementById("editStudentId").value;
+        students[index] = {
 
+            ...students[index],
 
-        const student = {
+            ...data,
 
-            id:
-                editId ||
-                document.getElementById("generatedId").textContent,
-
-            name:
-                document.getElementById("studentName").value.trim(),
-
-            father:
-                document.getElementById("fatherName").value.trim(),
-
-            cnic:
-                document.getElementById("cnic").value.trim(),
-
-            phone:
-                document.getElementById("phone").value.trim(),
-
-            email:
-                document.getElementById("email").value.trim(),
-
-            gender:
-                document.getElementById("gender").value,
-
-            dob:
-                document.getElementById("dob").value,
-
-            course:
-                document.getElementById("course").value,
-
-            semester:
-                document.getElementById("semester").value,
-
-            address:
-                document.getElementById("address").value.trim()
+            updatedAt:
+                new Date().toISOString()
 
         };
 
 
-        // UPDATE
-
-        if (editId) {
-
-            const index =
-                students.findIndex(
-                    student => student.id === editId
-                );
-
-            students[index] = student;
-
-            showToast(
-                "Updated!",
-                "Student information updated successfully."
-            );
-
-        }
-
-
-        // CREATE
-
-        else {
-
-            students.push(student);
-
-            showToast(
-                "Success!",
-                "Student added successfully."
-            );
-
-        }
-
-
-        saveStudents();
+        saveToStorage();
 
         renderStudents();
 
@@ -523,53 +572,175 @@ studentForm.addEventListener(
 
         closeModal();
 
+
+        showToast(
+            "Success!",
+            "Student updated successfully."
+        );
+
+
+        return;
+
     }
-);
 
 
-// ================= RENDER =================
+    /* ============================
+       ADD NEW STUDENT
+    ============================ */
+
+    const newStudent = {
+
+        id: generateStudentId(),
+
+        ...data,
+
+        createdAt:
+            new Date().toISOString()
+
+    };
+
+
+    /* IMPORTANT:
+       Add student to array
+    */
+
+    students.push(newStudent);
+
+
+    /* SAVE */
+
+    saveToStorage();
+
+
+    /* UPDATE SCREEN */
+
+    renderStudents();
+
+    updateStatistics();
+
+
+    /* CLOSE MODAL */
+
+    closeModal();
+
+
+    /* SUCCESS MESSAGE */
+
+    showToast(
+        "Success!",
+        "New student added successfully."
+    );
+
+
+    /* SCROLL TO TABLE */
+
+    setTimeout(function () {
+
+        document
+            .getElementById("studentsSection")
+            .scrollIntoView({
+                behavior: "smooth"
+            });
+
+    }, 200);
+
+}
+
+
+/* =====================================================
+   LOCAL STORAGE
+===================================================== */
+
+function saveToStorage() {
+
+    localStorage.setItem(
+        "students",
+        JSON.stringify(students)
+    );
+
+}
+
+
+/* =====================================================
+   RENDER STUDENTS
+===================================================== */
 
 function renderStudents() {
 
-    const tbody =
-        document.getElementById("studentTableBody");
+    const tableBody =
+        document.getElementById(
+            "studentTableBody"
+        );
 
     const emptyState =
-        document.getElementById("emptyState");
+        document.getElementById(
+            "emptyState"
+        );
 
-    const search =
+    const resultCount =
+        document.getElementById(
+            "resultCount"
+        );
+
+
+    const searchValue =
         document
             .getElementById("searchInput")
             .value
-            .toLowerCase()
-            .trim();
-
-    const course =
-        document.getElementById("courseFilter").value;
-
-    const gender =
-        document.getElementById("genderFilter").value;
+            .trim()
+            .toLowerCase();
 
 
-    let filtered =
-        students.filter(student => {
+    const courseValue =
+        document
+            .getElementById("courseFilter")
+            .value;
+
+
+    const genderValue =
+        document
+            .getElementById("genderFilter")
+            .value;
+
+
+    /* FILTER STUDENTS */
+
+    const filteredStudents =
+        students.filter(function (student) {
 
             const searchMatch =
-                student.id.toLowerCase().includes(search) ||
-                student.name.toLowerCase().includes(search) ||
-                student.father.toLowerCase().includes(search) ||
-                student.cnic.toLowerCase().includes(search) ||
-                student.phone.toLowerCase().includes(search);
+
+                !searchValue ||
+
+                student.name
+                    .toLowerCase()
+                    .includes(searchValue) ||
+
+                student.id
+                    .toLowerCase()
+                    .includes(searchValue) ||
+
+                student.cnic
+                    .toLowerCase()
+                    .includes(searchValue) ||
+
+                student.phone
+                    .toLowerCase()
+                    .includes(searchValue);
 
 
             const courseMatch =
-                !course ||
-                student.course === course;
+
+                !courseValue ||
+
+                student.course === courseValue;
 
 
             const genderMatch =
-                !gender ||
-                student.gender === gender;
+
+                !genderValue ||
+
+                student.gender === genderValue;
 
 
             return (
@@ -581,129 +752,113 @@ function renderStudents() {
         });
 
 
-    tbody.innerHTML = "";
+    /* CLEAR TABLE */
+
+    tableBody.innerHTML = "";
 
 
-    if (filtered.length === 0) {
+    /* EMPTY */
+
+    if (filteredStudents.length === 0) {
 
         emptyState.style.display = "block";
 
-        document.querySelector(".table-wrapper")
-            .style.display = "none";
+        resultCount.textContent =
+            "Showing 0 students";
 
-    }
-
-    else {
-
-        emptyState.style.display = "none";
-
-        document.querySelector(".table-wrapper")
-            .style.display = "block";
+        return;
 
     }
 
 
-    filtered.forEach(student => {
+    emptyState.style.display = "none";
+
+
+    /* CREATE ROWS */
+
+    filteredStudents.forEach(function (student) {
 
         const row =
             document.createElement("tr");
 
 
-        const initials =
-            student.name
-                .split(" ")
-                .map(word => word[0])
-                .slice(0, 2)
-                .join("")
-                .toUpperCase();
-
-
         row.innerHTML = `
 
             <td>
-                <strong>${student.id}</strong>
+                <strong>${escapeHTML(student.id)}</strong>
             </td>
-
 
             <td>
 
-                <div class="student-info">
-
-                    <div class="student-avatar">
-                        ${initials}
-                    </div>
-
-                    <div>
-
-                        <div class="student-name">
-                            ${escapeHTML(student.name)}
-                        </div>
-
-                        <div class="student-id">
-                            ${escapeHTML(student.email || "No email")}
-                        </div>
-
-                    </div>
-
+                <div class="student-name">
+                    ${escapeHTML(student.name)}
                 </div>
 
+                ${
+                    student.email
+                    ?
+                    `<div class="student-email">
+                        ${escapeHTML(student.email)}
+                    </div>`
+                    :
+                    ""
+                }
+
             </td>
 
-
             <td>
-                ${escapeHTML(student.father)}
+                ${escapeHTML(student.fatherName)}
             </td>
 
-
-            <td>
-                ${escapeHTML(student.course)}
-            </td>
-
-
             <td>
 
-                <span
-                    class="gender-badge ${
-                        student.gender === "Male"
-                            ? "gender-male"
-                            : "gender-female"
-                    }"
-                >
-                    ${student.gender}
+                <span class="course-badge">
+                    ${escapeHTML(student.course)}
                 </span>
 
             </td>
 
+            <td>
+
+                <span class="
+                    gender-badge
+                    ${
+                        student.gender === "Male"
+                        ? "gender-male"
+                        : "gender-female"
+                    }
+                ">
+                    ${escapeHTML(student.gender)}
+                </span>
+
+            </td>
 
             <td>
                 ${escapeHTML(student.phone)}
             </td>
-
 
             <td>
 
                 <div class="action-buttons">
 
                     <button
-                        class="action-btn view-btn"
+                        class="action-button view-button"
                         onclick="viewStudent('${student.id}')"
                         title="View"
                     >
                         <i class="fa-solid fa-eye"></i>
                     </button>
 
-
                     <button
-                        class="action-btn edit-btn"
+                        class="action-button edit-button"
                         onclick="editStudent('${student.id}')"
                         title="Edit"
                     >
                         <i class="fa-solid fa-pen"></i>
                     </button>
 
-
                     <button
-                        class="action-btn delete-btn"
+                        class="action-button delete-button"
                         onclick="deleteStudent('${student.id}')"
                         title="Delete"
                     >
@@ -717,242 +872,164 @@ function renderStudents() {
         `;
 
 
-        tbody.appendChild(row);
+        tableBody.appendChild(row);
 
     });
 
 
-    document.getElementById("resultCount").textContent =
-        `Showing ${filtered.length} of ${students.length} students`;
+    resultCount.textContent =
+        `Showing ${filteredStudents.length} of ${students.length} students`;
 
 }
 
 
-// ================= ESCAPE HTML =================
-
-function escapeHTML(value) {
-
-    return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-
-}
-
-
-// ================= EDIT =================
+/* =====================================================
+   EDIT STUDENT
+===================================================== */
 
 function editStudent(id) {
 
     const student =
-        students.find(
-            student => student.id === id
+        students.find(function (student) {
+
+            return student.id === id;
+
+        });
+
+
+    if (!student) {
+
+        showToast(
+            "Error",
+            "Student not found.",
+            "error"
         );
 
-    if (!student) return;
+        return;
+
+    }
 
 
-    document.getElementById("editStudentId").value =
-        student.id;
-
-    document.getElementById("studentName").value =
-        student.name;
-
-    document.getElementById("fatherName").value =
-        student.father;
-
-    document.getElementById("cnic").value =
-        student.cnic;
-
-    document.getElementById("phone").value =
-        student.phone;
-
-    document.getElementById("email").value =
-        student.email;
-
-    document.getElementById("gender").value =
-        student.gender;
-
-    document.getElementById("dob").value =
-        student.dob;
-
-    document.getElementById("course").value =
-        student.course;
-
-    document.getElementById("semester").value =
-        student.semester;
-
-    document.getElementById("address").value =
-        student.address;
+    document
+        .getElementById("editStudentId")
+        .value = student.id;
 
 
-    document.getElementById("generatedId").textContent =
-        student.id;
+    document
+        .getElementById("studentName")
+        .value = student.name;
 
 
-    document.getElementById("modalTitle").textContent =
-        "Edit Student";
+    document
+        .getElementById("fatherName")
+        .value = student.fatherName;
 
 
-    document.getElementById("saveButtonText").textContent =
-        "Update Student";
+    document
+        .getElementById("cnic")
+        .value = student.cnic;
 
 
-    modal.classList.add("show");
-
-}
-
-
-// ================= VIEW =================
-
-function viewStudent(id) {
-
-    const student =
-        students.find(
-            student => student.id === id
-        );
-
-    if (!student) return;
+    document
+        .getElementById("phone")
+        .value = student.phone;
 
 
-    const initials =
-        student.name
-            .split(" ")
-            .map(word => word[0])
-            .slice(0, 2)
-            .join("")
-            .toUpperCase();
+    document
+        .getElementById("email")
+        .value = student.email || "";
 
 
-    document.getElementById("studentDetails").innerHTML = `
-
-        <div class="details-header">
-
-            <div class="big-avatar">
-                ${initials}
-            </div>
-
-            <div>
-
-                <h3>
-                    ${escapeHTML(student.name)}
-                </h3>
-
-                <p>
-                    ${student.id} • ${escapeHTML(student.course)}
-                </p>
-
-            </div>
-
-        </div>
+    document
+        .getElementById("gender")
+        .value = student.gender;
 
 
-        <div class="details-grid">
-
-            <div class="detail-item">
-                <label>Student ID</label>
-                <strong>${student.id}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Student Name</label>
-                <strong>${escapeHTML(student.name)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Father Name</label>
-                <strong>${escapeHTML(student.father)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>CNIC</label>
-                <strong>${escapeHTML(student.cnic)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Phone</label>
-                <strong>${escapeHTML(student.phone)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Email</label>
-                <strong>${escapeHTML(student.email || "N/A")}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Gender</label>
-                <strong>${escapeHTML(student.gender)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Date of Birth</label>
-                <strong>${student.dob || "N/A"}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Course</label>
-                <strong>${escapeHTML(student.course)}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Semester</label>
-                <strong>${escapeHTML(student.semester || "N/A")}</strong>
-            </div>
-
-            <div class="detail-item">
-                <label>Address</label>
-                <strong>${escapeHTML(student.address || "N/A")}</strong>
-            </div>
-
-        </div>
-
-    `;
+    document
+        .getElementById("dob")
+        .value = student.dob || "";
 
 
-    viewModal.classList.add("show");
+    document
+        .getElementById("course")
+        .value = student.course;
+
+
+    document
+        .getElementById("semester")
+        .value =
+        student.semester || "";
+
+
+    document
+        .getElementById("address")
+        .value =
+        student.address || "";
+
+
+    document
+        .getElementById("modalTitle")
+        .textContent = "Edit Student";
+
+
+    document
+        .getElementById("saveButtonText")
+        .textContent = "Update Student";
+
+
+    updateGeneratedId();
+
+
+    document
+        .getElementById("studentModal")
+        .classList.add("show");
 
 }
 
 
-// ================= CLOSE VIEW =================
-
-function closeViewModal() {
-
-    viewModal.classList.remove("show");
-
-}
-
-
-// ================= DELETE =================
+/* =====================================================
+   DELETE STUDENT
+===================================================== */
 
 function deleteStudent(id) {
 
     const student =
-        students.find(
-            student => student.id === id
-        );
+        students.find(function (student) {
 
-    if (!student) return;
+            return student.id === id;
+
+        });
+
+
+    if (!student) {
+
+        return;
+
+    }
 
 
     const confirmed =
         confirm(
-            `Are you sure you want to delete ${student.name}?\n\nThis action cannot be undone.`
+            `Are you sure you want to delete ${student.name}?`
         );
 
 
-    if (!confirmed) return;
+    if (!confirmed) {
+
+        return;
+
+    }
 
 
     students =
-        students.filter(
-            student => student.id !== id
-        );
+        students.filter(function (student) {
+
+            return student.id !== id;
+
+        });
 
 
-    saveStudents();
+    saveToStorage();
 
     renderStudents();
 
@@ -961,13 +1038,126 @@ function deleteStudent(id) {
 
     showToast(
         "Deleted!",
-        "Student removed successfully."
+        "Student deleted successfully."
     );
 
 }
 
 
-// ================= STATISTICS =================
+/* =====================================================
+   VIEW STUDENT
+===================================================== */
+
+function viewStudent(id) {
+
+    const student =
+        students.find(function (student) {
+
+            return student.id === id;
+
+        });
+
+
+    if (!student) {
+
+        return;
+
+    }
+
+
+    const details =
+        document.getElementById(
+            "studentDetails"
+        );
+
+
+    details.innerHTML = `
+
+        <div class="details-grid">
+
+            <div class="detail-item">
+                <small>Student ID</small>
+                <strong>${escapeHTML(student.id)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Student Name</small>
+                <strong>${escapeHTML(student.name)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Father Name</small>
+                <strong>${escapeHTML(student.fatherName)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>CNIC</small>
+                <strong>${escapeHTML(student.cnic)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Phone</small>
+                <strong>${escapeHTML(student.phone)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Email</small>
+                <strong>${escapeHTML(student.email || "N/A")}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Gender</small>
+                <strong>${escapeHTML(student.gender)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Date of Birth</small>
+                <strong>${escapeHTML(student.dob || "N/A")}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Course</small>
+                <strong>${escapeHTML(student.course)}</strong>
+            </div>
+
+            <div class="detail-item">
+                <small>Semester</small>
+                <strong>${escapeHTML(student.semester || "N/A")}</strong>
+            </div>
+
+            <div class="detail-item full">
+                <small>Address</small>
+                <strong>${escapeHTML(student.address || "N/A")}</strong>
+            </div>
+
+        </div>
+
+    `;
+
+
+    document
+        .getElementById("viewModal")
+        .classList.add("show");
+
+}
+
+
+/* =====================================================
+   CLOSE VIEW MODAL
+===================================================== */
+
+function closeViewModal() {
+
+    document
+        .getElementById("viewModal")
+        .classList.remove("show");
+
+}
+
+
+/* =====================================================
+   STATISTICS
+===================================================== */
 
 function updateStatistics() {
 
@@ -976,79 +1166,106 @@ function updateStatistics() {
 
 
     const male =
-        students.filter(
-            student => student.gender === "Male"
-        ).length;
+        students.filter(function (student) {
+
+            return student.gender === "Male";
+
+        }).length;
 
 
     const female =
-        students.filter(
-            student => student.gender === "Female"
-        ).length;
+        students.filter(function (student) {
+
+            return student.gender === "Female";
+
+        }).length;
 
 
     const courses =
         new Set(
-            students.map(
-                student => student.course
-            )
+            students.map(function (student) {
+
+                return student.course;
+
+            })
         ).size;
 
 
-    const malePercent =
-        total
-            ? ((male / total) * 100).toFixed(1)
-            : 0;
-
-
-    const femalePercent =
-        total
-            ? ((female / total) * 100).toFixed(1)
-            : 0;
-
-
-    document.getElementById("totalStudents")
+    document
+        .getElementById("totalStudents")
         .textContent = total;
 
 
-    document.getElementById("maleStudents")
+    document
+        .getElementById("maleStudents")
         .textContent = male;
 
 
-    document.getElementById("femaleStudents")
+    document
+        .getElementById("femaleStudents")
         .textContent = female;
 
 
-    document.getElementById("totalCourses")
+    document
+        .getElementById("totalCourses")
         .textContent = courses;
 
 
-    document.getElementById("malePercentage")
-        .textContent = `${malePercent}%`;
+    const malePercentage =
+        total === 0
+        ? 0
+        : Math.round((male / total) * 100);
 
 
-    document.getElementById("femalePercentage")
-        .textContent = `${femalePercent}%`;
+    const femalePercentage =
+        total === 0
+        ? 0
+        : Math.round((female / total) * 100);
+
+
+    document
+        .getElementById("malePercentage")
+        .textContent =
+        `${malePercentage}% of students`;
+
+
+    document
+        .getElementById("femalePercentage")
+        .textContent =
+        `${femalePercentage}% of students`;
 
 }
 
 
-// ================= FILTER =================
+/* =====================================================
+   SEARCH / FILTER
+===================================================== */
 
 function clearFilters() {
 
-    document.getElementById("searchInput").value = "";
+    document
+        .getElementById("searchInput")
+        .value = "";
 
-    document.getElementById("courseFilter").value = "";
 
-    document.getElementById("genderFilter").value = "";
+    document
+        .getElementById("courseFilter")
+        .value = "";
+
+
+    document
+        .getElementById("genderFilter")
+        .value = "";
+
 
     renderStudents();
 
 }
 
 
-// ================= SCROLL =================
+/* =====================================================
+   SCROLL TO STUDENTS
+===================================================== */
 
 function scrollToStudents() {
 
@@ -1061,7 +1278,69 @@ function scrollToStudents() {
 }
 
 
-// ================= SIDEBAR =================
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+function goToDashboard() {
+
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+
+}
+
+
+/* =====================================================
+   REPORT
+===================================================== */
+
+function showReport() {
+
+    const total = students.length;
+
+    const male =
+        students.filter(
+            student => student.gender === "Male"
+        ).length;
+
+    const female =
+        students.filter(
+            student => student.gender === "Female"
+        ).length;
+
+
+    alert(
+        `Student Report\n\n` +
+        `Total Students: ${total}\n` +
+        `Male Students: ${male}\n` +
+        `Female Students: ${female}\n` +
+        `Courses: ${new Set(
+            students.map(student => student.course)
+        ).size}`
+    );
+
+}
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+function showSettings() {
+
+    alert(
+        "Settings\n\n" +
+        "Use the moon/sun button at the top to switch between dark and light mode."
+    );
+
+}
+
+
+/* =====================================================
+   MOBILE SIDEBAR
+===================================================== */
 
 function toggleSidebar() {
 
@@ -1072,47 +1351,136 @@ function toggleSidebar() {
 }
 
 
-// ================= REPORT =================
+/* =====================================================
+   DARK / LIGHT THEME
+===================================================== */
 
-function showReport() {
+function toggleTheme() {
 
-    showToast(
-        "Reports",
-        "Reports module is ready for future expansion."
+    document
+        .body
+        .classList
+        .toggle("dark");
+
+
+    const dark =
+        document.body.classList.contains("dark");
+
+
+    localStorage.setItem(
+        "studentMSTheme",
+        dark ? "dark" : "light"
     );
+
+
+    updateThemeIcon();
 
 }
 
 
-// ================= SETTINGS =================
+function loadTheme() {
 
-function showSettings() {
+    const theme =
+        localStorage.getItem(
+            "studentMSTheme"
+        );
 
-    showToast(
-        "Settings",
-        "Settings module is ready for future expansion."
-    );
+
+    if (theme === "dark") {
+
+        document
+            .body
+            .classList
+            .add("dark");
+
+    }
+
+
+    updateThemeIcon();
 
 }
 
 
-// ================= TOAST =================
+function updateThemeIcon() {
 
-let toastTimer;
+    const icon =
+        document.getElementById(
+            "themeIcon"
+        );
 
 
-function showToast(title, message) {
+    if (
+        document.body.classList.contains("dark")
+    ) {
+
+        icon.className =
+            "fa-solid fa-sun";
+
+    } else {
+
+        icon.className =
+            "fa-solid fa-moon";
+
+    }
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+function showToast(
+    title,
+    message,
+    type = "success"
+) {
 
     const toast =
         document.getElementById("toast");
 
+    const toastTitle =
+        document.getElementById("toastTitle");
 
-    document.getElementById("toastTitle")
-        .textContent = title;
+    const toastMessage =
+        document.getElementById("toastMessage");
+
+    const toastIcon =
+        toast.querySelector(".toast-icon i");
 
 
-    document.getElementById("toastMessage")
-        .textContent = message;
+    toastTitle.textContent = title;
+
+    toastMessage.textContent = message;
+
+
+    if (type === "error") {
+
+        toastIcon.className =
+            "fa-solid fa-xmark";
+
+        toast
+            .querySelector(".toast-icon")
+            .style.background = "#fee2e2";
+
+        toast
+            .querySelector(".toast-icon")
+            .style.color = "#dc2626";
+
+    } else {
+
+        toastIcon.className =
+            "fa-solid fa-check";
+
+        toast
+            .querySelector(".toast-icon")
+            .style.background = "#d1fae5";
+
+        toast
+            .querySelector(".toast-icon")
+            .style.color = "#059669";
+
+    }
 
 
     toast.classList.add("show");
@@ -1122,10 +1490,11 @@ function showToast(title, message) {
 
 
     toastTimer =
-        setTimeout(
-            hideToast,
-            3500
-        );
+        setTimeout(function () {
+
+            hideToast();
+
+        }, 3500);
 
 }
 
@@ -1139,83 +1508,24 @@ function hideToast() {
 }
 
 
-// ================= THEME =================
+/* =====================================================
+   ESCAPE HTML
+===================================================== */
 
-function toggleTheme() {
+function escapeHTML(value) {
 
-    document.body.classList.toggle("dark");
+    if (value === null || value === undefined) {
 
-    const icon =
-        document.getElementById("themeIcon");
-
-
-    if (
-        document.body.classList.contains("dark")
-    ) {
-
-        icon.className =
-            "fa-solid fa-moon";
+        return "";
 
     }
 
-    else {
 
-        icon.className =
-            "fa-solid fa-sun";
-
-    }
+    return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
 }
-
-
-// ================= MODAL OUTSIDE CLICK =================
-
-modal.addEventListener(
-    "click",
-    function(event) {
-
-        if (event.target === modal) {
-            closeModal();
-        }
-
-    }
-);
-
-
-viewModal.addEventListener(
-    "click",
-    function(event) {
-
-        if (event.target === viewModal) {
-            closeViewModal();
-        }
-
-    }
-);
-
-
-// ================= ESC KEY =================
-
-document.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (event.key === "Escape") {
-
-            closeModal();
-
-            closeViewModal();
-
-        }
-
-    }
-);
-
-
-// ================= INITIALIZE =================
-
-setCurrentDate();
-
-renderStudents();
-
-updateStatistics();
